@@ -6,16 +6,23 @@ loginList = list()
 loginMap = dict()
 address = '127.0.0.1'
 
-def add_new_user(username, password):
-    count = 0
-    return
-
-def valid_user(username,password):
-    return True
-
 app = Flask(__name__)
 app.config["MONGO_URI"] = 'mongodb+srv://lab2:ssHIbMqjtPAEGCLf@cluster0-moytw.mongodb.net/airline1?retryWrites=true'
 mongo = PyMongo(app)
+
+def add_new_user(username, password, name):
+    if mongo.db.customers.find_one({"userID": username}):
+        return False
+    else:
+        mongo.db.customers.insert_one({"customerName": name, "userID": username, "password": password})
+        return True
+    return False
+
+def valid_user(username,password):
+    if mongo.db.customers.find_one({"userID": username}):
+        if mongo.db.customers.find_one({"userID": username})['password'] == password:
+            return True
+    return False
 
 @app.route('/')
 def home():
@@ -39,7 +46,7 @@ def partners():
 @app.route('/createAccount', methods=['GET', 'POST'])
 def createAccount():
     if request.method == 'POST':
-        add_new_user(request.form['username'], request.form['password'])
+        add_new_user(request.form['username'], request.form['password'],request.form['name'])
         return redirect("http://" + address + ":5000/login", code=302)
     return render_template('create_account.html')
 
