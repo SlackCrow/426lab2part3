@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_pymongo import PyMongo
-import json
+import json as js
 
 loginList = list()
 loginMap = dict()
@@ -58,6 +58,15 @@ def login():
             error = 'Invalid Credentials. Please try again.'
         return redirect("http://" + address + ":5000/", code=302)
     return render_template('login.html', error=error)
+
+@app.route('/getUserName')
+def getUserName():
+    return ""
+
+@app.route('/getReservations')
+def getReservations():
+    reservationsToReturn = []
+    return json.dump(reservationsToReturn)
 
 if __name__ == '__main__':
     app.run()
