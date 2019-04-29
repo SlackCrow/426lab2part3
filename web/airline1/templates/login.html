@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flask Intro - login page</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="static/bootstrap.min.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Airline 1</a>
+</nav>
+  <br>
+    <div class="container">
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+      <h5>Please login</h5>
+      <br>
+      <form action="" method="post">
+        <input type="text" placeholder="Username" name="username" value="{{
+          request.form.username }}">
+          <br>
+         <input type="password" placeholder="Password" name="password" value="{{
+          request.form.password }}">
+          <br>
+          <br>
+        <input class="btn btn-primary" type="submit" value="Login">
+      </form>
+                <button type="button" class="btn btn-primary" onclick="location.href='createAccount';">Create Account</button>
+      {% if error %}
+        <p class="error"><strong>Error:</strong> {{ error }}
+      {% endif %}
+        </div>
+        </div>
+    </div>
+  </body>
+</html>
