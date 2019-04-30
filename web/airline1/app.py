@@ -11,6 +11,11 @@ app = Flask(__name__)
 app.config["MONGO_URI"] = 'mongodb+srv://lab2:ssHIbMqjtPAEGCLf@cluster0-moytw.mongodb.net/airline1?retryWrites=true'
 mongo = PyMongo(app)
 
+# add_new_user
+# @username(string): user's ID(e.g. jsmith)
+# @password(string): password
+# @name(string): user's name(e.g. John Smith)
+# Purpose: adds a user to the database
 def add_new_user(username, password, name):
     if mongo.db.customers.find_one({"userID": username}):
         return False
@@ -19,24 +24,55 @@ def add_new_user(username, password, name):
         return True
     return False
 
+# valid_user
+# @username(string): user's ID(e.g. jsmith)
+# @password(string): password
+# Purpose: Checks whether a user exists in the database or not using username
 def valid_user(username,password):
     if mongo.db.customers.find_one({"userID": username}):
         if mongo.db.customers.find_one({"userID": username})['password'] == password:
             return True
     return False
 
+
+# createReservation
+# fromLoc(string): Departing location
+# toLoc(string): Destination
+# date(string): Date(e.g. 12/31/2019)
+# userID(string): User ID
+# Purpose: adds a reservation to the database
 def createReservation(fromLoc,toLoc,date,userID):
     tempRevID = str(uuid.uuid4())
     while mongo.db.reservations.find_one({"revID": tempRevID}):
         tempRevID = str(uuid.uuid4())
     mongo.db.reservations.insert_one({"from": fromLoc, "to": toLoc, "date": date,"customer":userID, "revID":tempRevID})
 
+# getReservations
+# username(string): userID
+# Purpose: Gets all reservations for a specific customer
 def getReservations(username):
     listToReturn = []
     for reserv in mongo.db.reservations.find({"customer": username}):
         listToReturn.append(reserv)
     print(listToReturn)
     return listToReturn
+
+# deleteOneReservation
+# revID(string): Reservation ID
+# Purpose: Deletes a reservation from the database
+def deleteOneReservation(revID):
+    if mongo.db.reservations.delete_one({"revID": revID}):
+        return True
+    return False
+
+# getOneReservation
+# revID(string): Reservation ID
+# Purpose: Get a reservation from the database
+def getOneReservation(revID):
+    return mongo.db.reservations.find_one({"revID": revID})
+
+
+
 
 @app.route('/')
 def home():
