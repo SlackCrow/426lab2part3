@@ -52,6 +52,9 @@
                     <a class="nav-link" href="index.html">Home</a>
                 </li>
                 <li class="nav-item">
+                        <a class="nav-link" href="book.html">Book</a>
+                    </li>        
+                <li class="nav-item">
                     <a class="nav-link" href="partners.html">Partners</a>
                 </li>    
             </ul>
@@ -67,6 +70,46 @@
                       <h1 class="display-4">Your Upcoming Trips</h1>
                       <p class="lead">Keep Track of Your Trip</p>
                     </div>
-                </div>        
+                </div>
+                <p id="placeholder"></p>
     </main>
+
+    <script>
+    var pathname = window.location.origin;
+    var url = pathname + '/returnReservations';
+    const Http = new XMLHttpRequest();
+    Http.open("GET", url);
+    Http.send();
+    Http.onreadystatechange=(e)=>{
+        stringToSet = "<div class=\"container\">";
+        var resList = JSON.parse(Http.responseText);
+        for (let i=0; i<resList.length; i++) {
+            if(i % 4 == 0){
+                if(i == 0){
+                    stringToSet = stringToSet + "<div class=\"row\">";
+                }
+                else{
+                    stringToSet = stringToSet + "</div><div class=\"row\">";
+                }
+            }
+            thisRes = resList[i];
+            stringToSet = stringToSet +  "<div class=\"col-sm\">" + `
+                    <div class="card">
+                        <div class="card-header">` +
+                         thisRes["date"] +  `
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">` +thisRes['from'] + " to " + thisRes['to'] + `</h5>
+                            <a href=` + pathname + "/changeAirline?revID=" + thisRes['revID'] + ` class="btn btn-primary">Change airline</a>
+                        </div>
+                    </div>
+                    <br>
+            `;
+            if(i+1 == resList.length){
+                stringToSet = stringToSet + "</div>";
+            }
+        }
+        document.getElementById("placeholder").innerHTML = stringToSet + "</div>";
+    }
+    </script>
 </body>

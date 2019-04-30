@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_pymongo import PyMongo
-import json as js
+from bson.json_util import dumps
+import uuid
 
 loginList = list()
 loginMap = dict()
@@ -24,6 +25,19 @@ def valid_user(username,password):
             return True
     return False
 
+def createReservation(fromLoc,toLoc,date,userID):
+    tempRevID = str(uuid.uuid4())
+    while mongo.db.reservations.find_one({"revID": tempRevID}):
+        tempRevID = str(uuid.uuid4())
+    mongo.db.reservations.insert_one({"from": fromLoc, "to": toLoc, "date": date,"customer":userID, "revID":tempRevID})
+
+def getReservations(username):
+    listToReturn = []
+    for reserv in mongo.db.reservations.find({"customer": username}):
+        listToReturn.append(reserv)
+    print(listToReturn)
+    return listToReturn
+
 @app.route('/')
 def home():
     return render_template("index.html")
@@ -39,6 +53,24 @@ def reservation():
     else:
         return redirect("http://" + address + ":5000/login", code=302)
 
+@app.route('/book.html', methods=['GET', 'POST'])
+def book():
+    error = None
+    if request.remote_addr in loginList:
+        if request.method == 'POST':
+            fromLoc = request.form['from']
+            toLoc = request.form['to']
+            month = request.form['month']
+            day = request.form['day']
+            year = request.form['year']
+            date = month + '/' + day + '/' + year
+            createReservation(fromLoc,toLoc,date,loginMap[request.remote_addr])
+            return redirect("http://" + address + ":5000/reservation.html", code=302)
+    else:
+        return redirect("http://" + address + ":5000/login", code=302)
+    return render_template('book.html', error=error)
+
+
 @app.route('/partners.html')
 def partners():
     return render_template("partners.html")
@@ -48,7 +80,7 @@ def createAccount():
     if request.method == 'POST':
         add_new_user(request.form['username'], request.form['password'],request.form['name'])
         return redirect("http://" + address + ":5000/login", code=302)
-    return render_template('create_account.html')
+    return render_template('signup.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -70,10 +102,14 @@ def login():
 def getUserName():
     return ""
 
-@app.route('/getReservations')
-def getReservations():
-    reservationsToReturn = []
-    return json.dump(reservationsToReturn)
+@app.route('/changeAirline', methods=['GET', 'POST'])
+def changeAirline():
+    pass
+
+@app.route('/returnReservations', methods=['GET', 'POST'])
+def returnReservations():
+    reservationsToReturn = getReservations(loginMap[request.remote_addr])
+    return dumps(reservationsToReturn)
 
 if __name__ == '__main__':
     app.run()
