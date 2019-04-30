@@ -51,8 +51,16 @@ api.add_resource(Request, '/request')
 # Verify this airline can take a given customer. return 1 if yes, 0 no.
 def validateCustomerReservation(customerName):
     # Look through database to determine output
-    return 1
-
+    if mongo.db.customers.find_one({"customerName": customerName}):
+        if mongo.db.reservations.find_one({"customer":mongo.db.customers.find_one({"customerName": customerName})['userID']}):
+            return 1
+        else:
+            return 0
+    else:
+        return 0
+    return 0
+    
+validateCustomerReservation('admin')
 # BLOCKCHAIN FUNCTIONS #########################################################################
 def proccess_transaction_blockchain(txn_dict):
     signed_txn = w3.eth.account.signTransaction(txn_dict, private_key=airline1_private_key)
