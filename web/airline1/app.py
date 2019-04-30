@@ -21,7 +21,7 @@ airline1_private_key = "2CE8FABF78D208C16CC4C9A6A379AD83BD8AFAEB52B82CA918B4670D
 airline2_private_key = "197D0CA5903BD0DAF21076F09D1A6AC2D780D3010E531B5CFBB7CD7A69E275F1"
 infura_url = "https://ropsten.infura.io/v3/c5aa7254666449beb6f5a5d8536313dd"
 
-with open(os.path.dirname(__file__) + '/../../smart_contract/abi.json') as f:
+with open(os.path.dirname(__file__) + os.path.join('..','..','smart_contract','abi.json')) as f:
     info_json = json.load(f)
 abi = info_json
 

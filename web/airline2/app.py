@@ -29,7 +29,7 @@ w3 = Web3(HTTPProvider(infura_url))
 w3.eth.enable_unaudited_features()
 contract = w3.eth.contract(address = contract_address, abi = abi)
 app = Flask(__name__)
-app.config["MONGO_URI"] = 'mongodb+srv://lab2:ssHIbMqjtPAEGCLf@cluster0-moytw.mongodb.net/airline1?retryWrites=true'
+app.config["MONGO_URI"] = 'mongodb+srv://lab2:ssHIbMqjtPAEGCLf@cluster0-moytw.mongodb.net/airline2?retryWrites=true'
 mongo = PyMongo(app)
 api = Api(app)
 
@@ -51,7 +51,14 @@ api.add_resource(Request, '/request')
 # Verify this airline can take a given customer. return 1 if yes, 0 no.
 def validateCustomerReservation(customerName):
     # Look through database to determine output
-    return 1
+    if mongo.db.customers.find_one({"customerName": customerName}):
+        if mongo.db.reservations.find_one({"customer":mongo.db.customers.find_one({"customerName": customerName})['userID']}):
+            return 1
+        else:
+            return 0
+    else:
+        return 0
+    return 0
 
 # BLOCKCHAIN FUNCTIONS #########################################################################
 def proccess_transaction_blockchain(txn_dict):
