@@ -231,10 +231,12 @@ def changeAirline():
     # Once finished, we call the response function on the OTHER AIRLINE.
     result = get('http://127.0.0.1:5000/response').json()
     print(result)
+
     # If it returns 1 (they can take the customer) then update DB
     #TODO:
-    #if(result == 1):
-        # Update DB shit
+    #if(result['result'] == 1):
+        # Remove customer from DB
+        # Add customer to other airlines DB... I'm not sure how this is gonna work :(
 
     # Call response function in smart contract to put transaction on blockchain
     response_blockchain(airline2_wallet_addr, details, result)

@@ -233,8 +233,9 @@ def changeAirline():
     print(result)
     # If it returns 1 (they can take the customer) then update DB
     #TODO:
-    #if(result == 1):
-        # Update DB shit
+    #if(result['result'] == 1):
+        # Remove customer from DB
+        # Add customer to other airlines DB... I'm not sure how this is gonna work :(
 
     # Call response function in smart contract to put transaction on blockchain
     response_blockchain(airline1_wallet_addr, details, result)
