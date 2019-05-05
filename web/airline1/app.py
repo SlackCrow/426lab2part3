@@ -37,22 +37,30 @@ api = Api(app)
 
 class Response(Resource):
     def get(self):
-        customerName = get('http://127.0.0.1:5001/request').json()
-        responseResult = validateCustomerReservation(customerName) # 1 if we can accept customer
-        #TODO:
-        # if(responseResult == 1):
-            # Add customer to our DB
+        request = get('http://127.0.0.1:5001/request').json()
+        responseResult = canChangeAirline(request['name']) # 1 if we can accept customer
+
+        # Add the customer to our DB if we can accept him.
+        if(responseResult == 1):
+            add_new_user(request['username'], request['password'], request['name'])
         return {'result': responseResult}
 
 class Request(Resource):
     def get(self):
         username = loginMap[request.remote_addr]
-        return {'result': username}
+        password = mongo.db.customers.find_one({"userID": username})['password']
+        name = mongo.db.customers.find_one({"userID": username})['customerName']
+        return {'username': username, 'password': password, 'name': name}
 
 api.add_resource(Response, '/response')
 api.add_resource(Request, '/request')
 
-#TODO:
+# Checks if a customer transferring airlines can transfer into this airline.
+# 1 if they can transfer, 0 otherwise
+def canChangeAirline(customerName):
+    return 1
+
+
 # Verify this airline can take a given customer. return 1 if yes, 0 no.
 def validateCustomerReservation(customerName):
     # Look through database to determine output
@@ -64,8 +72,7 @@ def validateCustomerReservation(customerName):
     else:
         return 0
     return 0
-    
-validateCustomerReservation('admin')
+
 # BLOCKCHAIN FUNCTIONS #########################################################################
 def proccess_transaction_blockchain(txn_dict):
     signed_txn = w3.eth.account.signTransaction(txn_dict, private_key=airline1_private_key)
@@ -240,17 +247,17 @@ def changeAirline():
     details = loginMap[request.remote_addr] + " requests a change to airline " + airline2_wallet_addr
     print(details)
     # Put request on blockchain
-    request_blockchain(airline1_wallet_addr, details)
+    #request_blockchain(airline1_wallet_addr, details)
     # Once finished, we call the response function on the OTHER AIRLINE.
     result = get('http://127.0.0.1:5001/response').json()
     print(result)
+
     # If it returns 1 (they can take the customer) then update DB
-    #TODO:
-    #if(result['result'] == 1):
-        # Remove customer from DB
+    if(result['result'] == 1):
+        mongo.db.customers.delete_one({'userID': loginMap[request.remote_addr]})
 
     # Call response function in smart contract to put transaction on blockchain
-    response_blockchain(airline1_wallet_addr, details, result)
+    #response_blockchain(airline1_wallet_addr, details, result)
     return render_template('index.html')
 
 @app.route('/returnReservations', methods=['GET', 'POST'])
