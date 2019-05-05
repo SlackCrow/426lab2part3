@@ -13,6 +13,8 @@ loginList = list()
 loginMap = dict()
 address = '127.0.0.1'
 
+
+
 # Contract setup
 contract_address = "0x089cB3A8C19C5b20cABAdF0691dAD52083FD7Aa2"
 airline1_wallet_addr = "0xE75D9DE667F7FFaCD7a300E02dc4e6654598cA77"
@@ -21,7 +23,7 @@ airline1_private_key = "2CE8FABF78D208C16CC4C9A6A379AD83BD8AFAEB52B82CA918B4670D
 airline2_private_key = "197D0CA5903BD0DAF21076F09D1A6AC2D780D3010E531B5CFBB7CD7A69E275F1"
 infura_url = "https://ropsten.infura.io/v3/c5aa7254666449beb6f5a5d8536313dd"
 
-with open(os.path.dirname(__file__) + os.sep + '..' + os.sep + '..' + os.sep + 'smart_contract' + os.sep + 'abi.json') as f:
+with open("abi.json") as f:
     info_json = json.load(f)
 abi = info_json
 
