@@ -14,7 +14,6 @@ loginMap = dict()
 address = '127.0.0.1'
 
 
-
 # Contract setup
 contract_address = "0x089cB3A8C19C5b20cABAdF0691dAD52083FD7Aa2"
 airline1_wallet_addr = "0xE75D9DE667F7FFaCD7a300E02dc4e6654598cA77"
@@ -39,12 +38,14 @@ class Response(Resource):
     def get(self):
         request = get('http://127.0.0.1:5001/request').json()
         responseResult = canChangeAirline(request['name']) # 1 if we can accept customer
-        details = request['name'] + " requests a change to airline " + airline1_wallet_addr
+        details = request['username'] + " requests a change to airline " + airline1_wallet_addr
 
         # Add the customer to our DB if we can accept him.
         if(responseResult == 1):
             add_new_user(request['username'], request['password'], request['name'])
-            response_blockchain(airline2_wallet_addr, details, responseResult)
+            createReservation(request['from'], request['to'], request['date'], request['username'])
+
+        response_blockchain(airline2_wallet_addr, details, responseResult)
         return {'result': responseResult}
 
 class Request(Resource):
@@ -52,7 +53,10 @@ class Request(Resource):
         username = loginMap[request.remote_addr]
         password = mongo.db.customers.find_one({"userID": username})['password']
         name = mongo.db.customers.find_one({"userID": username})['customerName']
-        return {'username': username, 'password': password, 'name': name}
+        fromLocation = mongo.db.reservations.find_one({"revID": revID})['from']
+        toLocation = mongo.db.reservations.find_one({"revID": revID})['to']
+        date = mongo.db.reservations.find_one({"revID": revID})['date']
+        return {'username': username, 'password': password, 'name': name, 'revID': revID, 'from': fromLocation, 'to': toLocation, 'date': date}
 
 api.add_resource(Response, '/response')
 api.add_resource(Request, '/request')
@@ -246,6 +250,8 @@ def getUserName():
 
 @app.route('/changeAirline', methods=['GET', 'POST'])
 def changeAirline():
+    global revID
+    revID = request.args.get('revID')
     details = loginMap[request.remote_addr] + " requests a change to airline " + airline2_wallet_addr
     print(details)
     # Put request on blockchain
@@ -257,7 +263,7 @@ def changeAirline():
     # If it returns 1 (they can take the customer) then update DB
     if(result['result'] == 1):
         mongo.db.customers.delete_one({'userID': loginMap[request.remote_addr]})
-
+        deleteOneReservation(revID)
     return render_template('index.html')
 
 @app.route('/returnReservations', methods=['GET', 'POST'])
