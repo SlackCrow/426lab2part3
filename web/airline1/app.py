@@ -39,10 +39,12 @@ class Response(Resource):
     def get(self):
         request = get('http://127.0.0.1:5001/request').json()
         responseResult = canChangeAirline(request['name']) # 1 if we can accept customer
+        details = request['name'] + " requests a change to airline " + airline1_wallet_addr
 
         # Add the customer to our DB if we can accept him.
         if(responseResult == 1):
             add_new_user(request['username'], request['password'], request['name'])
+            response_blockchain(airline2_wallet_addr, details, responseResult)
         return {'result': responseResult}
 
 class Request(Resource):
@@ -103,7 +105,7 @@ def request_blockchain(toAirline, details):
 
 def response_blockchain(fromAirline, details, successful):
     nonce = w3.eth.getTransactionCount(airline1_wallet_addr)
-    txn_dict = contract.functions.response(w3.toChecksumAddress(fromAirline), str(details), (successful['result'] == 1)).buildTransaction({
+    txn_dict = contract.functions.response(w3.toChecksumAddress(fromAirline), str(details), successful == 1).buildTransaction({
         'chainId': 3,
         'gas': 1400000,
         'gasPrice': w3.toWei('40', 'gwei'),
@@ -247,7 +249,7 @@ def changeAirline():
     details = loginMap[request.remote_addr] + " requests a change to airline " + airline2_wallet_addr
     print(details)
     # Put request on blockchain
-    #request_blockchain(airline1_wallet_addr, details)
+    request_blockchain(airline2_wallet_addr, details)
     # Once finished, we call the response function on the OTHER AIRLINE.
     result = get('http://127.0.0.1:5001/response').json()
     print(result)
@@ -256,8 +258,6 @@ def changeAirline():
     if(result['result'] == 1):
         mongo.db.customers.delete_one({'userID': loginMap[request.remote_addr]})
 
-    # Call response function in smart contract to put transaction on blockchain
-    #response_blockchain(airline1_wallet_addr, details, result)
     return render_template('index.html')
 
 @app.route('/returnReservations', methods=['GET', 'POST'])
