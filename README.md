@@ -1,1 +1,1 @@
-# For 4/526lab2part3
+Simple implementation of an airline reservation service built on top of Solidity(Ethereum) 
